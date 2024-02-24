@@ -1,5 +1,17 @@
 # Fine-tuning LLMs using Amazon SageMaker, AWS Trainium, and Optimum Neuron
 
+## My Notes:
+| Resource              | General Overview                                                                                              | Usage in the Lab                                                                                                     |
+|-----------------------|---------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------|
+| Amazon SageMaker      | A fully managed service for building, training, and deploying machine learning models.                        | Used to fine-tune a pretrained Hugging Face Large Language Model (LLM) and deploy the fine-tuned model for inference.           |
+| AWS Trainium          | Custom machine learning (ML) accelerator designed for cost-effective training of deep learning models.        | Accelerates the training of LLMs, making the process faster and more cost-efficient.                                            |
+| AWS Inferentia        | Machine learning inference chip designed for high performance at low cost.                                    | Deploys the fine-tuned LLM for real-time inference tasks.                                                                      |
+| Amazon SageMaker Studio| An integrated development environment (IDE) for machine learning.                                              | Provides the environment to write, test, and debug the code needed to fine-tune and deploy the LLM.                            |
+| Hugging Face Optimum Neuron | A library providing an interface between Hugging Face Transformers and AWS ML accelerators like Trainium and Inferentia. | Optimizes the Hugging Face model for AWS hardware accelerators, enabling efficient training and inference.                     |
+| Amazon Elastic Compute Cloud (EC2) | A web service that provides secure, resizable compute capacity in the cloud.                                  | Hosts the training and inference instances, specifically trn1.2xlarge for training and inf2.xlarge for inference.               |
+| Amazon S3             | An object storage service offering scalability, data availability, security, and performance.                  | Stores the training data, the fine-tuned model, and any other static files required for the lab.                                |
+
+
 This lab is provided as part of **[AWS Innovate AI/ML and Data Edition](https://aws.amazon.com/events/aws-innovate/apj/aiml-data/)**.
 
 ℹ️ You will run this lab in your own AWS account. Please follow directions at the end of the lab to remove resources to avoid future costs.
@@ -29,17 +41,36 @@ It is recommended to run this workshop from the **us-west-2** region. If you alr
 
 ![SageMaker Domain](/images/sagemaker_domain.png)
 
+```bash
+$ aws sagemaker list-domains
+{
+    "Domains": []
+}
+```
+```bash
+$ export HISTTIMEFORMAT="%F %T "
+$ history | tail -2 | head -1
+507  2024-02-22 19:00:53 aws sagemaker list-domains
+```
+
 4. Choose **Set up for single user (Quick setup)** and then click the **Set up** button to begin creating your SageMaker domain.
 
 ![Quick Setup](/images/quick_setup.png)
 
 5. Wait a few minutes while the SageMaker domain is being created. Once the domain has been created, click the Launch dropdown and choose Studio.
+```bash
+$ aws sagemaker list-domains
+```
 
 ![Launch Domain](/images/launch_domain.png)
 
-6. When the SageMaker Studio landing page opens, choose Studio Classic from the top-left Applications pane.
+6. When the SageMaker Studio landing page opens, choose Studio Classic from the top-left Applications pane. 
 
 ![Studio Landing Page](/images/sm_studio_landing_page.png)
+
+6b. Then run the Studio Classic application and click open. 
+
+![image](https://github.com/WarrenTheRabbit/fine-tuning-llms-on-aws/assets/37808734/db4974dd-6a5e-4306-87e1-15cb51ec862d)
 
 7. You will be redirected to your Studio environment that will look similar to the screen below.
 
@@ -103,6 +134,25 @@ Please refer to the above-mentioned Jupyter notebook and run each of the noteboo
 [AWS Inferentia2](https://aws.amazon.com/machine-learning/inferentia) is the second generation purpose built Machine Learning inference accelerator from AWS. Amazon EC2 Inf2 instances are powered by AWS Inferentia2. Inf2 instances raise the performance of Inf1 by delivering 3x higher compute performance, 4x larger total accelerator memory, up to 4x higher throughput, and up to 10x lower latency. Inf2 instances are the first inference-optimized instances in Amazon EC2 to support scale-out distributed inference with ultra-high-speed connectivity between accelerators. You can now efficiently and cost-effectively deploy models with hundreds of billions of parameters across multiple accelerators on Inf2 instances.
 
 In this lab you will work with a single inf2.xlarge instance containing a single Inferentia2 accelerator with 2 NeuronCores. While the inf2.xlarge instance is useful for most cost-optimized inference, AWS also offers larger inf2.48xlarge and inf2.24xlarge instance types that each contain 12 and 6 Inferentia2 accelerators (24 and 12 NeuronCores) and are capable of more performance optimized inference. 
+
+## Notes
+Example training example:
+```
+###Query: Classify the following movie review as positive or negative
+###Review: "Tulip" is on the "Australian All Shorts" video from "Tribe First Rites" showcasing the talents of \
+first time directors.<br /><br />I wish more scripts had such excellent dialogue.<br /><br />I hope Rachel \
+Griffiths has more stories to tell, she does it so well.
+###Classification: positive</s>\n\n
+```
+- Uses SageMaker Python SDK to prepare, launch and monitor the progress of a PyTorch-based training job
+- 12 minutes to train {model} on {thousands} of descriptive prompts.
+- Runs a PyTorch training job using SageMaker's PyTorch estimator and an AWS Trainium accelerator via an AWS EC2 trn1.2xlarge instance
+- Hugging Face Optimum Neuron package
+
+## Extra steps
+Change the line magic command that is intended to install sagemaker to a shell command: !pip install -U sagemaker -q
+Run the application.
+Increase AWS Sagemaker service quota for training jobs with trn1.2xlarge instance.
 
 ## Summary
 Now that you have completed the session, you should have an understanding of:
